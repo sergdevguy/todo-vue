@@ -1,7 +1,7 @@
 const service = {
   getDefault() {
     return {
-      id: Date.now().toString(16) + "_" + Math.cell(Math.random() * 1000).toString(16)
+      id: Date.now().toString(16) + "_" + Math.ceil(Math.random() * 1000).toString(16)
     }
   },
   getStatusList() {
