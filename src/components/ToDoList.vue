@@ -1,5 +1,6 @@
 <script setup>
   import { computed } from "vue"
+
   const
     $props = defineProps({
       "modelValue": { type: Array, default: () => [] },
@@ -12,7 +13,7 @@
           return item.text.toUpperCase().includes($props.filter.toUpperCase())
         })
       } else {
-        return $props.modelValue;
+        return $props.modelValue
       }
     })
 

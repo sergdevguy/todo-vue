@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed } from "vue"
+  import { computed } from "vue"
   import todoService from "../services/todo"
 
   const
@@ -9,7 +9,7 @@
     _status = computed(() => {
       let status = {}
       todoService.getStatusList().forEach(stat => {
-        status[stat.id] = 0;
+        status[stat.id] = 0
       })
       $props.items.forEach(todo => {
         status[todo.status] += 1

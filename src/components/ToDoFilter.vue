@@ -1,24 +1,23 @@
 <script setup>
   import { ref, onMounted } from "vue"
+
   const
     $props = defineProps(["modelValue"]),
     $emit = defineEmits(["update:modelValue"]),
     _value = ref("")
 
   onMounted(() => {
-    _value.text = $props.modelValue;
+    _value.text = $props.modelValue
   })
 
   function clear() {
-    _value.value = "";
+    _value.value = ""
     publishValue()
   }
 
   function publishValue() {
     $emit("update:modelValue", _value.value)
   }
-
-
 </script>
 
 <template>
@@ -30,5 +29,3 @@
     </button>
   </div>
 </template>
-
-<style scoped></style>
