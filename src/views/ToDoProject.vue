@@ -1,17 +1,28 @@
 <script setup>
-  import { ref, inject } from "vue"
-  import TodoItemForm from "./ToDoItemForm.vue"
-  import TodoList from "./ToDoList.vue"
-  import TodoFilter from "./ToDoFilter.vue"
-  import TodoSummary from "./ToDoSummary.vue"
-  import todoService from "../services/todo"
+  import { ref, inject, onMounted, watch } from "vue"
+  import { useRouter } from "vue-router"
+  import TodoItemForm from "../components/ToDos/ToDoItemForm.vue";
+  import TodoList from "../components/ToDos/ToDoList.vue";
+  import TodoFilter from "../components/ToDos/ToDoFilter.vue";
+  import TodoSummary from "../components/ToDos/ToDoSummary.vue"
+  import todoService from "../services/todo";
+  import eventBus from "../services/eventBus"
+
 
   const
+    $props = defineProps(["id"]),
     $modals = inject("$modals"),
+    $router = useRouter(),
     _filter = ref(""),
     _item = ref(todoService.getDefault()),
-    _items = ref([])
+    _items = ref([]),
+    _project_name = ref("")
 
+  // First time mounted
+  onMounted(loadProject)
+
+  // Watch for future changes
+  watch(() => $props.id, loadProject)
 
   // Shows a modal to create or edit a to-do item
   function showModal(new_item = true, item = {}) {
@@ -21,7 +32,7 @@
       _item.value = todoService.getDefault()
     } else {
       // Make a copy of the item for editing
-      _item.value = todoService.makeCopy(item)
+      _item.value = todoService.makeCopy(item);
     }
 
     // Open the modal
@@ -31,13 +42,14 @@
         _items.value.push(_item.value)
       } else {
         // Replace item
-        let index = getIndex(item)
+        let index = getIndex(item);
         if (index >= 0) {
           _items.value[index] = _item.value
         } else {
           alert("Error updating the item")
         }
       }
+      saveProject()
     }, () => {
       // Handle cancellation, in this case, just ignore.
     })
@@ -45,13 +57,15 @@
 
   function deleteItem(item) {
     $modals.show("deleteItem").then(() => {
-      let index = getIndex(item)
+      let index = getIndex(item);
       if (index >= 0) {
         _items.value.splice(index, 1)
+        saveProject()
       }
     }, () => { })
   }
 
+  // Auxiliar function 
   function getIndex(item) {
     let index = _items.value.findIndex(it => {
       return it.id == item.id
@@ -65,6 +79,30 @@
 
   function toggleStatus(item) {
     item.status = todoService.toggleStatus(item.status)
+    saveProject()
+  }
+
+  // Deletes the entire project and triggers a system-wide update event
+  function deleteProject() {
+    $modals.show("deleteProject").then(() => {
+      // delete project
+      todoService.deleteProject($props.id)
+      eventBus.emit("#UpdateProjects")
+      $router.push({ name: "landing" })
+    }, () => { })
+  }
+
+  // Chapter 5
+  function loadProject() {
+    // Project name
+    _project_name.value = todoService.getProjectName($props.id)
+
+    // Items
+    _items.value = todoService.loadProject($props.id)
+  }
+
+  function saveProject() {
+    todoService.saveProject($props.id, _items.value)
   }
 </script>
 
